@@ -1,0 +1,66 @@
+CC = gcc
+CXX = g++
+
+#release or debug
+ver=release
+ifeq (debug,${ver})
+CARGS += -c -g -Wall -fPIC 
+else
+CARGS += -c -g -Wall -fPIC
+endif
+
+DEPDIR = ..
+INCLUDE = -I$(DEPDIR)/inc
+add_right := $(shell sh -c './mkreleasehdr.sh')
+
+
+INSTALL = install
+LDFLAGS += -lpthread -shared
+
+CFLAGS = $(INCLUDE) 
+CXXFLAGS = $(CFLAGS) -Wno-non-template-friend
+
+
+TARGETS:=libzrouter.so
+
+# To make output colorful.
+
+ZROUTER_CC=$(QUIET_CC)$(CC) $(CFLAGS)
+ZROUTER_LD=$(QUIET_LINK)$(CXX) $(LDFLAGS)
+ZROUTER_INSTALL=$(QUIET_INSTALL)$(INSTALL)
+
+CCCOLOR="\033[34m"
+LINKCOLOR="\033[34;1m"
+SRCCOLOR="\033[33m"
+BINCOLOR="\033[37;1m"
+MAKECOLOR="\033[32;1m"
+ENDCOLOR="\033[0m"
+
+ifndef V
+QUIET_CC = @printf '    %b %b\n' $(CCCOLOR)CC$(ENDCOLOR) $(SRCCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_LINK = @printf '    %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_INSTALL = @printf '    %b %b\n' $(LINKCOLOR)INSTALL$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+endif
+
+OBJS = $(patsubst %.cpp,%.o,$(wildcard *.cpp)) $(patsubst %.c,%.o,$(wildcard *.c))
+
+all: $(TARGETS)
+
+.PHONY: all
+
+$(TARGETS): $(OBJS)
+	$(ZROUTER_LD) $(LDFLAGS_$@) -o $@ $^ $(STATIC_LIBS)
+	cp $(TARGETS) ../
+%.o: %.c
+	$(ZROUTER_CC) $(CFLAGS_$@) $(CARGS) $<
+%.o: %.cpp
+	$(QUIET_CC)$(CXX) $(CARGS) $(INCLUDE) $<
+install:
+	cp zrouter /home/sdp/zrouter
+clean: 
+	-rm -f *.o 
+	-rm -f zrouter
+	-rm -f ../zrouter
+	-rm ../inc/zrouter_version.h       
+.PHONY: clean
+

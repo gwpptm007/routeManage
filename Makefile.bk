@@ -1,0 +1,14 @@
+
+SUBDIR = ./src
+ver = release
+MAKE = make
+revision = 0
+subsystem:
+	cd $(SUBDIR) && $(MAKE) ver=$(ver)
+
+clean:                              
+	cd $(SUBDIR) && $(MAKE) clean
+
+install:
+	cd $(SUBDIR) && $(MAKE) install
+
